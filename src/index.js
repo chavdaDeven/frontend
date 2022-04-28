@@ -1,7 +1,6 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
 import HttpService from "./services/HttpService";
@@ -9,12 +8,16 @@ import UserService from "./services/UserService";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-const renderApp = () =>
+const renderApp = () => {
+  const App = lazy(() => import("./App"));
   root.render(
     <React.StrictMode>
-      <App />
+      <Suspense fallback={<div>Loading...</div>}>
+        <App />
+      </Suspense>
     </React.StrictMode>
   );
+};
 
 UserService.initKeycloak(renderApp);
 HttpService.configure();
