@@ -61,8 +61,6 @@ type Mutation {
   finishUpload(input: FinishUploadInput!): FinishUploadPayload
   login(input: ObtainJSONWebTokenInput!): ObtainJSONWebTokenPayload
   node(id: ID!): Node
-  register(input: RegisterInput!): RegisterPayload
-  updateMe(input: UpdateMeInput!): UpdateMePayload
 }
 
 interface Node {
@@ -91,30 +89,7 @@ type Query {
   uploads: [UploadType]
 }
 
-input RegisterInput {
-  password: String!
-  username: String!
-  clientMutationId: String
-}
-
-type RegisterPayload {
-  user: UserType
-  clientMutationId: String
-}
-
 scalar UUID
-
-input UpdateMeInput {
-  firstName: String!
-  lastName: String!
-  email: String!
-  clientMutationId: String
-}
-
-type UpdateMePayload {
-  me: UserType
-  clientMutationId: String
-}
 
 type UploadType implements Node {
   id: ID!
@@ -131,8 +106,7 @@ type UploadType implements Node {
 }
 
 type UserType {
-  username: String!
+  id: UUID!
   firstName: String!
   lastName: String!
-  id: UUID!
 }

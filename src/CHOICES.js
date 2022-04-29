@@ -62,24 +62,6 @@ const CHOICES = {
     "PROCESSING": 3,
     "UPLOADED": 2,
     "UPLOADING": 1
-  },
-  "UserKind": {
-    "ADMIN": 1,
-    "CHOICE_LIST": [
-      {
-        "label": "Admin",
-        "value": 1
-      },
-      {
-        "label": "Client",
-        "value": 2
-      }
-    ],
-    "CHOICE_MAP": {
-      "1": "Admin",
-      "2": "Client"
-    },
-    "CLIENT": 2
   }
 };
 export default CHOICES;

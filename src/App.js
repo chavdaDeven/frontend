@@ -2,33 +2,21 @@ import logo from "./logo.svg";
 import "./App.scss";
 import { BrowserRouter } from "react-router-dom";
 
+import React, { Suspense, lazy } from "react";
 import RenderOnAnonymous from "./components/RenderOnAnonymous";
 import RenderOnAuthenticated from "./components/RenderOnAuthenticated";
+
+const Navigation = lazy(() => import("./components/Navigation"));
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="container">
+      <div className="container-fluid">
         <RenderOnAnonymous>
           <div className="App">NOT Authenticated yet!</div>
         </RenderOnAnonymous>
         <RenderOnAuthenticated>
-          <div className="App">
-            <header className="App-header">
-              <img src={logo} className="App-logo" alt="logo" />
-              <p>
-                Edit <code>src/App.js</code> and save to reload.
-              </p>
-              <a
-                className="App-link"
-                href="https://reactjs.org"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Learn React
-              </a>
-            </header>
-          </div>
+          <Navigation />
         </RenderOnAuthenticated>
       </div>
     </BrowserRouter>
