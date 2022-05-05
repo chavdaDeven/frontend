@@ -40,7 +40,7 @@ function App() {
             <Row>
               <Col>
                 <Routes>
-                  {/*<Route index element={<Home />} />*/}
+                  <Route index element={<div>Home</div>} />
                   <Route
                     path="/dashboard"
                     element={
