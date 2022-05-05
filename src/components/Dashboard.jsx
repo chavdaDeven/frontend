@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import graphql from "babel-plugin-relay/macro";
-import { loadQuery, usePreloadedQuery } from "react-relay/hooks";
-
-import RelayEnvironment from "../RelayEnvironment";
+import { usePreloadedQuery } from "react-relay/hooks";
 
 const DashboardMeQuery = graphql`
   query DashboardMeQuery {
@@ -13,9 +11,7 @@ const DashboardMeQuery = graphql`
   }
 `;
 
-const preloadedQuery = loadQuery(RelayEnvironment, DashboardMeQuery);
-
-function Dashboard() {
+function Dashboard({ preloadedQuery }) {
   const data = usePreloadedQuery(DashboardMeQuery, preloadedQuery);
   return (
     <div>

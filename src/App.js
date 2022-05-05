@@ -6,6 +6,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { RelayEnvironmentProvider } from "react-relay/hooks";
 
+import { loadQuery } from "react-relay/hooks";
 import LazyLoader from "./components/LazyLoader";
 import RelayEnvironment from "./RelayEnvironment";
 import RenderOnAnonymous from "./components/RenderOnAnonymous";
@@ -16,6 +17,9 @@ const Dashboard = lazy(() => import("./components/Dashboard"));
 const Questions = lazy(() => import("./components/Questions"));
 const Settings = lazy(() => import("./components/Settings"));
 const Profile = lazy(() => import("./components/Profile"));
+
+const DashboardMeQuery = require("./components/__generated__/DashboardMeQuery.graphql.js");
+const dashboardMeQuery = loadQuery(RelayEnvironment, DashboardMeQuery);
 
 function App() {
   return (
@@ -41,7 +45,7 @@ function App() {
                     path="/dashboard"
                     element={
                       <LazyLoader>
-                        <Dashboard />
+                        <Dashboard preloadedQuery={dashboardMeQuery} />
                       </LazyLoader>
                     }
                   />
