@@ -2,8 +2,9 @@ import logo from "./logo.svg";
 import "./App.scss";
 import { BrowserRouter } from "react-router-dom";
 
-import React, { Suspense, lazy } from "react";
+import React, { lazy } from "react";
 import RenderOnAnonymous from "./components/RenderOnAnonymous";
+import LazyLoader from "./components/LazyLoader";
 import RenderOnAuthenticated from "./components/RenderOnAuthenticated";
 
 const Navigation = lazy(() => import("./components/Navigation"));
@@ -16,7 +17,9 @@ function App() {
           <div className="App">NOT Authenticated yet!</div>
         </RenderOnAnonymous>
         <RenderOnAuthenticated>
-          <Navigation />
+          <LazyLoader>
+            <Navigation />
+          </LazyLoader>
         </RenderOnAuthenticated>
       </div>
     </BrowserRouter>

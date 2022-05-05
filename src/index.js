@@ -1,10 +1,11 @@
-import React, { Suspense, lazy } from "react";
+import React, { lazy } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
 import HttpService from "./services/HttpService";
 import UserService from "./services/UserService";
+import LazyLoader from "./components/LazyLoader";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -12,9 +13,9 @@ const renderApp = () => {
   const App = lazy(() => import("./App"));
   root.render(
     <React.StrictMode>
-      <Suspense fallback={<div>Loading...</div>}>
+      <LazyLoader>
         <App />
-      </Suspense>
+      </LazyLoader>
     </React.StrictMode>
   );
 };

@@ -1,40 +1,32 @@
-<header>
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        Backend
-      </a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarCollapse"
-        aria-controls="navbarCollapse"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav me-auto mb-2 mb-md-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">
-              Home
-            </a>
-          </li>
-        </ul>
-        <form class="d-flex">
-          <input
-            class="form-control me-2"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-          />
-          <button class="btn btn-outline-success" type="submit">
-            Search
-          </button>
-        </form>
-      </div>
-    </div>
-  </nav>
-</header>;
+import React, { useState } from "react";
+import Navbar from "react-bootstrap/Navbar";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import NavDropdown from "react-bootstrap/NavDropdown";
+
+function Navigation() {
+  return (
+    <Navbar bg="dark" variant="dark" expand="lg">
+      <Container>
+        <Navbar.Brand href="/">Template</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse>
+          <Nav className="me-auto">
+            <Nav.Link href="dashboard">Dashboard</Nav.Link>
+            <Nav.Link href="qna">Q&amp;A</Nav.Link>
+          </Nav>
+          <Nav>
+            <NavDropdown title="<username>">
+              <NavDropdown.Item href="settings">Settings</NavDropdown.Item>
+              <NavDropdown.Item href="profile">Profile</NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item href="logout">Logout</NavDropdown.Item>
+            </NavDropdown>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+  );
+}
+
+export default Navigation;
