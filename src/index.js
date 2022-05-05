@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
-import HttpService from "./services/HttpService";
 import UserService from "./services/UserService";
 import LazyLoader from "./components/LazyLoader";
 
@@ -21,7 +20,6 @@ const renderApp = () => {
 };
 
 UserService.initKeycloak(renderApp);
-HttpService.configure();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

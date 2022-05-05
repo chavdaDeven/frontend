@@ -32,8 +32,7 @@ const getToken = () => _kc.token;
 
 const isLoggedIn = () => !!_kc.token;
 
-const updateToken = (successCallback) =>
-  _kc.updateToken(5).then(successCallback).catch(doLogin);
+const updateToken = () => _kc.updateToken(5).catch(doLogin);
 
 const getUsername = () => _kc.tokenParsed?.preferred_username;
 
