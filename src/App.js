@@ -1,7 +1,7 @@
 import "./App.scss";
 import React, { lazy } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { RelayEnvironmentProvider } from "react-relay/hooks";
@@ -11,10 +11,13 @@ import LazyLoader from "./components/LazyLoader";
 import RelayEnvironment from "./RelayEnvironment";
 import RenderOnAnonymous from "./components/RenderOnAnonymous";
 import RenderOnAuthenticated from "./components/RenderOnAuthenticated";
+import { Questions as QuestionsRoute, Create } from "./Utility/RouteConsts.js";
+import CreateQuestion from "./components/Question/Create";
+import QuestionDetails from "./components/Question/Details";
 
 const Navigation = lazy(() => import("./components/Navigation"));
 const Dashboard = lazy(() => import("./components/Dashboard"));
-const Questions = lazy(() => import("./components/Questions"));
+const Questions = lazy(() => import("./components/Question/Index"));
 const Settings = lazy(() => import("./components/Settings"));
 const Profile = lazy(() => import("./components/Profile"));
 
@@ -50,10 +53,26 @@ function App() {
                     }
                   />
                   <Route
-                    path="/questions"
+                    path={`/${QuestionsRoute}`}
                     element={
                       <LazyLoader>
                         <Questions />
+                      </LazyLoader>
+                    }
+                  />
+                  <Route
+                    path={`/${QuestionsRoute}/${Create}`}
+                    element={
+                      <LazyLoader>
+                        <CreateQuestion />
+                      </LazyLoader>
+                    }
+                  />
+                  <Route
+                    path={`/${QuestionsRoute}/:questionID`}
+                    element={
+                      <LazyLoader>
+                        <QuestionDetails />
                       </LazyLoader>
                     }
                   />

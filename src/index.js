@@ -5,17 +5,21 @@ import reportWebVitals from "./reportWebVitals";
 
 import UserService from "./services/UserService";
 import LazyLoader from "./components/LazyLoader";
+import { StoreProvider } from "easy-peasy";
+import store from "./store/store.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const renderApp = () => {
   const App = lazy(() => import("./App"));
   root.render(
-    <React.StrictMode>
-      <LazyLoader>
-        <App />
-      </LazyLoader>
-    </React.StrictMode>
+    <StoreProvider store={store}>
+      <React.StrictMode>
+        <LazyLoader>
+          <App />
+        </LazyLoader>
+      </React.StrictMode>
+    </StoreProvider>
   );
 };
 

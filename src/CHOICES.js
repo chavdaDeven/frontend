@@ -62,6 +62,24 @@ const CHOICES = {
     "PROCESSING": 3,
     "UPLOADED": 2,
     "UPLOADING": 1
+  },
+  "VoteKind": {
+    "CHOICE_LIST": [
+      {
+        "label": "Up",
+        "value": 1
+      },
+      {
+        "label": "Down",
+        "value": 2
+      }
+    ],
+    "CHOICE_MAP": {
+      "1": "Up",
+      "2": "Down"
+    },
+    "DOWN": 2,
+    "UP": 1
   }
 };
 export default CHOICES;

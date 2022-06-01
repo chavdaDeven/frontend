@@ -3,10 +3,104 @@ schema {
   mutation: Mutation
 }
 
+type AnswerType implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  question: QuestionType!
+  text: String!
+  user: UserType!
+  voteUp: Int
+  voteDown: Int
+  voteCount: Int
+  commentCount: Int
+}
+
+type AnswerTypeConnection {
+  pageInfo: PageInfo!
+  edges: [AnswerTypeEdge]!
+}
+
+type AnswerTypeEdge {
+  node: AnswerType
+  cursor: String!
+}
+
+input ApplyVoteInput {
+  objectId: ID!
+  contentTypeId: Int!
+  kind: Int!
+  clientMutationId: String
+}
+
+type ApplyVotePayload {
+  vote: VoteType
+  clientMutationId: String
+}
+
+type CommentType implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  objectId: UUID!
+  contentType: ContentTypeType!
+  text: String!
+  user: UserType!
+  voteUp: Int
+  voteDown: Int
+  voteCount: Int
+}
+
+type CommentTypeConnection {
+  pageInfo: PageInfo!
+  edges: [CommentTypeEdge]!
+}
+
+type CommentTypeEdge {
+  node: CommentType
+  cursor: String!
+}
+
 type ContentTypeType {
   id: ID!
   appLabel: String!
   model: String!
+  voteSet(offset: Int, before: String, after: String, first: Int, last: Int): VoteTypeConnection!
+  commentSet(offset: Int, before: String, after: String, first: Int, last: Int): CommentTypeConnection!
+}
+
+input CreateAnswerInput {
+  questionId: ID!
+  text: String!
+  clientMutationId: String
+}
+
+type CreateAnswerPayload {
+  answer: AnswerType
+  clientMutationId: String
+}
+
+input CreateCommentInput {
+  objectId: ID!
+  contentTypeId: Int!
+  text: String!
+  clientMutationId: String
+}
+
+type CreateCommentPayload {
+  comment: CommentType
+  clientMutationId: String
+}
+
+input CreateQuestionInput {
+  text: String!
+  title: String!
+  clientMutationId: String
+}
+
+type CreateQuestionPayload {
+  question: QuestionType
+  clientMutationId: String
 }
 
 input CreateUploadInput {
@@ -54,12 +148,16 @@ type FinishUploadPayload {
   clientMutationId: String
 }
 
-scalar GenericScalar
-
 type Mutation {
+  applyVote(input: ApplyVoteInput!): ApplyVotePayload
+  createAnswer(input: CreateAnswerInput!): CreateAnswerPayload
+  createComment(input: CreateCommentInput!): CreateCommentPayload
+  createQuestion(input: CreateQuestionInput!): CreateQuestionPayload
+  updateAnswer(input: UpdateAnswerInput!): UpdateAnswerPayload
+  updateComment(input: UpdateCommentInput!): UpdateCommentPayload
+  updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload
   createUpload(input: CreateUploadInput!): CreateUploadPayload
   finishUpload(input: FinishUploadInput!): FinishUploadPayload
-  login(input: ObtainJSONWebTokenInput!): ObtainJSONWebTokenPayload
   node(id: ID!): Node
 }
 
@@ -67,20 +165,17 @@ interface Node {
   id: ID!
 }
 
-input ObtainJSONWebTokenInput {
-  clientMutationId: String
-  username: String!
-  password: String!
-}
-
-type ObtainJSONWebTokenPayload {
-  payload: GenericScalar!
-  refreshExpiresIn: Int!
-  clientMutationId: String
-  token: String!
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
 }
 
 type Query {
+  comments(objectId: ID!, contentTypeId: Int!): [CommentType]
+  question(id: ID!): QuestionType
+  questions: [QuestionType]
   node(id: ID!): Node
   contentTypes: [ContentTypeType]
   _debug: DjangoDebug
@@ -89,7 +184,58 @@ type Query {
   uploads: [UploadType]
 }
 
+type QuestionType implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  text: String!
+  title: String!
+  user: UserType!
+  answers(offset: Int, before: String, after: String, first: Int, last: Int): AnswerTypeConnection!
+  voteUp: Int
+  voteDown: Int
+  voteCount: Int
+  commentCount: Int
+}
+
 scalar UUID
+
+input UpdateAnswerInput {
+  questionId: ID!
+  text: String!
+  id: ID!
+  clientMutationId: String
+}
+
+type UpdateAnswerPayload {
+  answer: AnswerType
+  clientMutationId: String
+}
+
+input UpdateCommentInput {
+  objectId: ID!
+  contentTypeId: Int!
+  text: String!
+  id: ID!
+  clientMutationId: String
+}
+
+type UpdateCommentPayload {
+  comment: CommentType
+  clientMutationId: String
+}
+
+input UpdateQuestionInput {
+  text: String!
+  title: String!
+  id: ID!
+  clientMutationId: String
+}
+
+type UpdateQuestionPayload {
+  question: QuestionType
+  clientMutationId: String
+}
 
 type UploadType implements Node {
   id: ID!
@@ -109,4 +255,24 @@ type UserType {
   id: UUID!
   firstName: String!
   lastName: String!
+}
+
+type VoteType implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  objectId: UUID!
+  contentType: ContentTypeType!
+  kind: Int!
+  user: UserType!
+}
+
+type VoteTypeConnection {
+  pageInfo: PageInfo!
+  edges: [VoteTypeEdge]!
+}
+
+type VoteTypeEdge {
+  node: VoteType
+  cursor: String!
 }
