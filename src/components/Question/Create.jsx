@@ -77,7 +77,10 @@ const CreateQuestion = () => {
               className="form-control"
               placeholder="Write your question here!"
               value={questionTitleState}
-              onChange={($event) => setQuestionTitleState($event.target.value)}
+              onChange={($event) => {
+                setShowErrorForTitle(false);
+                setQuestionTitleState($event.target.value);
+              }}
             />
             {showErrorForTitle && (
               <p className="error-message-txt mt-1">Title must be unique...</p>

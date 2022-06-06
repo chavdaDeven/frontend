@@ -4,7 +4,11 @@ import { createStore, action, persist, computed } from "easy-peasy";
 const store = createStore(
   // persist - will store data, won't loss data even if you refresh the page...
   persist({
-    contentTypeList: [], //re-named
+    contentTypeList: [],
+    currentUser: { id: "", firstName: "", lastName: "" },
+    setCurrentUserAction: action((state, payload) => {
+      state.currentUser = payload;
+    }),
     setContentDataAction: action((state, payload) => {
       state.contentTypeList = payload;
     }),

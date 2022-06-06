@@ -14,6 +14,7 @@ import RenderOnAuthenticated from "./components/RenderOnAuthenticated";
 import { Questions as QuestionsRoute, Create } from "./Utility/RouteConsts.js";
 import CreateQuestion from "./components/Question/Create";
 import QuestionDetails from "./components/Question/Details";
+import Home from "./components/Home";
 
 const Navigation = lazy(() => import("./components/Navigation"));
 const Dashboard = lazy(() => import("./components/Dashboard"));
@@ -43,7 +44,14 @@ function App() {
             <Row>
               <Col>
                 <Routes>
-                  <Route index element={<div>Home</div>} />
+                  <Route
+                    index
+                    element={
+                      <LazyLoader>
+                        <Home />
+                      </LazyLoader>
+                    }
+                  />
                   <Route
                     path="/dashboard"
                     element={

@@ -1,5 +1,5 @@
 import graphql from "babel-plugin-relay/macro";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useMutation } from "react-relay";
 import { useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
@@ -9,7 +9,7 @@ import createCommentMutation from "../../services/mutations/createCommentMutatio
 import updateQuestionMutation from "../../services/mutations/updateQuestionMutation";
 import editIcon from "../../assets/icons/editIcon.svg";
 import { formateDate } from "../../Utility/utils.js";
-import { useStoreState } from "easy-peasy";
+import { action, useLocalStore, useStoreState } from "easy-peasy";
 import { useForm } from "react-hook-form";
 
 const getQuestionDetailsByIdQuery = graphql`
@@ -66,12 +66,47 @@ const applyVoteMutation = graphql`
 
 const QuestionDetails = () => {
   let { questionID } = useParams();
-  const [questionDetailsState, setQuestionDetailsState] = useState([]);
-  const [showHideViewsState, setShowHideViewsState] = useState({
-    showAddAnswerViewState: false,
-    updateQuestionViewState: false,
-    showAddCommentViewState: false,
-  });
+  const [state, actions] = useLocalStore(() => ({
+    questionDetailsState: [],
+    showHideViewsState: {
+      showAddAnswerViewState: false,
+      updateQuestionViewState: false,
+      showAddCommentViewState: false,
+    },
+    addAllDetails: action((_state, payload) => {
+      _state.questionDetailsState = payload;
+    }),
+    addNewAnswer: action((_state, payload) => {
+      try {
+        _state.questionDetailsState.answers.edges.push({
+          node: { ...payload.details, user: payload.currentUser },
+        });
+      } catch (error) {
+        Object.assign(_state.questionDetailsState, {
+          answers: { edges: [] },
+        });
+        _state.questionDetailsState.answers.edges.push({ node: payload });
+      }
+    }),
+    increaseCounter: action((_state) => {
+      _state.questionDetailsState.voteCount += 1;
+    }),
+    decreaseCounter: action((_state) => {
+      _state.questionDetailsState.voteCount -= 1;
+    }),
+    changeShowAddAnswerViewStateAction: action((_state) => {
+      _state.showHideViewsState.showAddAnswerViewState =
+        !_state.showHideViewsState.showAddAnswerViewState;
+    }),
+    changeUpdateQuestionViewStateAction: action((_state) => {
+      _state.showHideViewsState.updateQuestionViewState =
+        !_state.showHideViewsState.updateQuestionViewState;
+    }),
+    changeShowAddCommentViewStateAction: action((_state) => {
+      _state.showHideViewsState.showAddCommentViewState =
+        !_state.showHideViewsState.showAddCommentViewState;
+    }),
+  }));
 
   const [mutateFunction, isLoading] = useMutation(applyVoteMutation);
   const [mutateUpdateQuestionFunction] = useMutation(updateQuestionMutation);
@@ -92,10 +127,12 @@ const QuestionDetails = () => {
   const commentContentTypeID = useStoreState((store) =>
     store.getContentTypeIdByModel("questions", "comment")
   );
+  const currentUserState = useStoreState((store) => store.currentUser);
 
   const {
     register,
     handleSubmit,
+    resetField,
     formState: { errors },
   } = useForm();
 
@@ -112,8 +149,8 @@ const QuestionDetails = () => {
   } = useForm();
 
   const updateQuestionDetails = useCallback(() => {
-    setQuestionDetailsState(data.question);
-  }, [data]);
+    actions.addAllDetails(data.question);
+  }, [data, actions]);
 
   useEffect(() => {
     updateQuestionDetails();
@@ -148,10 +185,7 @@ const QuestionDetails = () => {
               return;
             }
           }
-          // setQuestionDetailsState([
-          //   ...questionDetailsState,
-          //   { voteCount: questionDetailsState[0].voteCount + 1 },
-          // ]);
+          actions.increaseCounter();
         },
         onError(err) {
           console.error(err);
@@ -182,10 +216,7 @@ const QuestionDetails = () => {
             return;
           }
         }
-        // setQuestionDetailsState([
-        //   ...questionDetailsState,
-        //   { voteCount: questionDetailsState[0].voteCount - 1 },
-        // ]);
+        actions.decreaseCounter();
       },
       onError(err) {
         console.error(err);
@@ -193,13 +224,13 @@ const QuestionDetails = () => {
     });
   };
 
-  const saveAnswerOnClickHandler = (data) => {
-    if (data.answerInput && data.answerInput.length > 9) {
+  const saveAnswerOnClickHandler = (answerData) => {
+    if (answerData.answerInput && answerData.answerInput.length > 9) {
       mutateAddAnswerFunction({
         variables: {
           input: {
             questionId: questionID,
-            text: data.answerInput,
+            text: answerData.answerInput,
           },
         },
         onCompleted(res, error) {
@@ -227,11 +258,12 @@ const QuestionDetails = () => {
               return;
             }
           }
-          console.warn(res);
-          setShowHideViewsState({
-            ...showHideViewsState,
-            showAddAnswerViewState: !showHideViewsState.showAddAnswerViewState,
+          actions.addNewAnswer({
+            details: res.createAnswer.answer,
+            currentUser: currentUserState,
           });
+          actions.changeShowAddAnswerViewStateAction();
+          resetField("answerInput");
         },
         onError(err) {
           console.warn(err.message);
@@ -242,9 +274,9 @@ const QuestionDetails = () => {
 
   const updateQuestionBtnOnClickHandler = (updatedQuestionData) => {
     if (
-      (questionDetailsState?.title !==
+      (state.questionDetailsState?.title !==
         updatedQuestionData.updatedQuestionTitle ||
-        questionDetailsState?.text !==
+        state.questionDetailsState?.text !==
           updatedQuestionData.updatedQuestionBody) &&
       updatedQuestionData.updatedQuestionTitle &&
       updatedQuestionData.updatedQuestionBody
@@ -273,9 +305,7 @@ const QuestionDetails = () => {
             }
           }
           console.warn(res);
-          setShowHideViewsState({
-            updateQuestionViewState: false,
-          });
+          actions.changeUpdateQuestionViewStateAction();
         },
         onError(err) {
           console.error(err);
@@ -285,7 +315,7 @@ const QuestionDetails = () => {
   };
 
   const addCommentBtnClickHandler = (data) => {
-    if (showHideViewsState.showAddCommentViewState && data.commentInput) {
+    if (state.showHideViewsState.showAddCommentViewState && data.commentInput) {
       // add comment button is visible can add comment in back-end
       mutateCreateCommentFunction({
         variables: {
@@ -310,10 +340,7 @@ const QuestionDetails = () => {
         },
       });
     }
-    setShowHideViewsState({
-      ...showHideViewsState,
-      showAddCommentViewState: !showHideViewsState.showAddCommentViewState,
-    });
+    actions.changeShowAddCommentViewStateAction();
   };
 
   return (
@@ -334,7 +361,7 @@ const QuestionDetails = () => {
             </div>
             <div className="card mt-1 card-circle">
               <div className="card-body">
-                <p>{questionDetailsState?.voteCount}</p>
+                <p>{state.questionDetailsState?.voteCount}</p>
               </div>
             </div>
             <div
@@ -351,9 +378,9 @@ const QuestionDetails = () => {
               <div className="card-body">
                 <div className="row">
                   <div className="col-11">
-                    {!showHideViewsState.updateQuestionViewState ? (
+                    {!state.showHideViewsState.updateQuestionViewState ? (
                       <h5 className="card-title">
-                        Question : {data.question?.title}
+                        Question : {state.questionDetailsState?.title}
                       </h5>
                     ) : (
                       <form
@@ -364,7 +391,7 @@ const QuestionDetails = () => {
                         <textarea
                           className="form-control"
                           placeholder="Update Your Question!"
-                          defaultValue={data.question?.title}
+                          defaultValue={state.questionDetailsState?.title}
                           {...registerUpdateQuestion("updatedQuestionTitle", {
                             required: true,
                             minLength: 10,
@@ -378,7 +405,7 @@ const QuestionDetails = () => {
                           )}
                         <textarea
                           className="form-control"
-                          defaultValue={questionDetailsState?.text}
+                          defaultValue={state.questionDetailsState?.text}
                           placeholder="Update Your Question Body!"
                           {...registerUpdateQuestion("updatedQuestionBody", {
                             required: true,
@@ -402,41 +429,43 @@ const QuestionDetails = () => {
                     )}
                   </div>
                   <div className="col-1 text-center">
-                    {!showHideViewsState.updateQuestionViewState && (
+                    {!state.showHideViewsState.updateQuestionViewState && (
                       <img
                         src={editIcon}
                         alt="Edit question"
                         style={{ height: "30px", width: "30px" }}
                         onClick={() =>
-                          setShowHideViewsState({
-                            updateQuestionViewState: true,
-                          })
+                          actions.changeUpdateQuestionViewStateAction()
                         }
                       />
                     )}
                   </div>
                 </div>
 
-                {!showHideViewsState.updateQuestionViewState && (
+                {!state.showHideViewsState.updateQuestionViewState && (
                   <>
                     <div className="row">
                       <div className="col">
                         <p>
                           Created At :
-                          {` ${formateDate(questionDetailsState?.createdAt)}`}
+                          {` ${formateDate(
+                            state.questionDetailsState?.createdAt
+                          )}`}
                         </p>
                       </div>
                       <div className="col">
                         <p>
                           Updated At :
-                          {` ${formateDate(questionDetailsState?.updatedAt)}`}
+                          {` ${formateDate(
+                            state.questionDetailsState?.updatedAt
+                          )}`}
                         </p>
                       </div>
                     </div>
 
-                    <p>Question Body: {questionDetailsState?.text}</p>
+                    <p>Question Body: {state.questionDetailsState?.text}</p>
                     <form onSubmit={commentSubmit(addCommentBtnClickHandler)}>
-                      {showHideViewsState.showAddCommentViewState && (
+                      {state.showHideViewsState.showAddCommentViewState && (
                         <>
                           <textarea
                             className="form-control"
@@ -457,7 +486,6 @@ const QuestionDetails = () => {
                         className="btn btn-outline-secondary mt-3 mb-3"
                         type="submit"
                         id="addCommentBtn"
-                        // onClick={addCommentBtnClickHandler}
                       >
                         Add Comment
                       </button>
@@ -466,14 +494,15 @@ const QuestionDetails = () => {
                 )}
               </div>
             </div>
-            {data.question.answers && data.question.answers.edges.length > 0 ? (
+            {state.questionDetailsState.answers &&
+            state.questionDetailsState.answers.edges.length > 0 ? (
               <>
                 <h5 className="mt-3 mb-3">Answers:</h5>
-                {data.question.answers.edges.map((ele, i) => {
+                {state.questionDetailsState.answers.edges.map((ele, i) => {
                   return (
                     <div className="card mt-1 card-circle" key={i}>
                       <div className="card-body">
-                        <p>{ele.node.text}</p>
+                        <p>{ele.node?.text}</p>
                         <div className="row">
                           <div className="col">
                             <p>
@@ -496,18 +525,12 @@ const QuestionDetails = () => {
             ) : (
               <p>Add Some Answers</p>
             )}
-            {!showHideViewsState.showAddAnswerViewState ? (
+            {!state.showHideViewsState.showAddAnswerViewState ? (
               <button
                 className="btn btn-outline-secondary mt-3"
                 type="button"
                 id="addAnswerBtn"
-                onClick={() =>
-                  setShowHideViewsState({
-                    ...showHideViewsState,
-                    showAddAnswerViewState:
-                      !showHideViewsState.showAddAnswerViewState,
-                  })
-                }
+                onClick={() => actions.changeShowAddAnswerViewStateAction()}
               >
                 Add Answer
               </button>
@@ -532,7 +555,6 @@ const QuestionDetails = () => {
                     className="btn btn-outline-secondary mt-3"
                     type="submit"
                     id="saveAnswerBtn"
-                    // onClick={saveAnswerOnClickHandler}
                   >
                     Save Answer
                   </button>
